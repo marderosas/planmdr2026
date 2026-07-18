@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Catch-all default deny to ensure zero-trust by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 2. Rules for registered_users (local and Google users)
+    match /registered_users/{userId} {
+      // Anyone can query users to verify login credentials and search/register
+      allow read, list: if true;
+      
+      // Permit creation of user profiles
+      allow create: if isValidId(userId) 
+        && request.resource.data.keys().hasAll(['uid', 'email', 'displayName', 'role'])
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string;
+        
+      // Permit updates if user is authenticated as owner or if it is a local user profile (ID starts with 'user-')
+      allow update: if isOwner(userId) 
+        || userId.startsWith('user-') 
+        || !isSignedIn();
+        
+      // Permit deletes if authenticated as owner
+      allow delete: if isOwner(userId) || userId.startsWith('user-') || !isSignedIn();
+    }
+
+    // 3. Rules for users (monolithic client state for CRM)
+    match /users/{userId} {
+      // Anyone can read and write their own client states to ensure local/offline sync functions correctly
+      allow read, write: if isOwner(userId) 
+        || userId.startsWith('user-') 
+        || !isSignedIn();
+    }
+
+    // 4. Rules for audit_logs (Bitacora / Audit logging)
+    match /audit_logs/{logId} {
+      allow read, list: if true;
+      
+      allow create: if isValidId(logId)
+        && request.resource.data.keys().hasAll(['id', 'module', 'action', 'userEmail', 'userName', 'timestamp'])
+        && request.resource.data.module is string
+        && request.resource.data.action is string;
+        
+      allow update, delete: if false; // Audit logs should be append-only and immutable
+    }
+  }
+}

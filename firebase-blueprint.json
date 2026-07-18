@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with roles and details",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number of the user"
+        },
+        "rut": {
+          "type": "string",
+          "description": "The Chilean RUT number of the user"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["uid", "email", "displayName"]
+    },
+    "EventState": {
+      "title": "EventState",
+      "description": "Monolithic state containing all events data",
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "array",
+          "description": "Array of clients"
+        },
+        "checklist": {
+          "type": "object",
+          "description": "Map of client ID to checklist items"
+        },
+        "dayTimeline": {
+          "type": "object",
+          "description": "Map of client ID to timeline items"
+        },
+        "protocols": {
+          "type": "object",
+          "description": "Map of client ID to protocols"
+        },
+        "budgetItems": {
+          "type": "object",
+          "description": "Map of client ID to budget items"
+        },
+        "installments": {
+          "type": "object",
+          "description": "Map of client ID to installments"
+        },
+        "vendors": {
+          "type": "array",
+          "description": "Array of shared vendors"
+        },
+        "serviceOrders": {
+          "type": "object",
+          "description": "Map of client ID to service orders"
+        },
+        "guests": {
+          "type": "object",
+          "description": "Map of client ID to guests"
+        },
+        "tables": {
+          "type": "object",
+          "description": "Map of client ID to tables"
+        },
+        "moodImages": {
+          "type": "object",
+          "description": "Map of client ID to moodboards"
+        },
+        "inventory": {
+          "type": "array",
+          "description": "Array of inventory items"
+        },
+        "selectedClientId": {
+          "type": "string",
+          "description": "Active client ID"
+        },
+        "foodMenu": {
+          "type": "object",
+          "description": "Map of client ID to food menu items"
+        },
+        "globalDishes": {
+          "type": "array",
+          "description": "Array of reusable global dishes"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last cloud synchronization"
+        }
+      }
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Audit log for activities (Bitacora)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Log entry identifier"
+        },
+        "module": {
+          "type": "string",
+          "description": "Application module where action was performed"
+        },
+        "action": {
+          "type": "string",
+          "description": "Description of the user action"
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Email of the user who performed the action"
+        },
+        "userName": {
+          "type": "string",
+          "description": "Display name of the user who performed the action"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Readable timestamp of the event in Chilean timezone"
+        }
+      },
+      "required": ["id", "module", "action", "userEmail", "userName", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/registered_users/{userId}": {
+      "schema": "#/entities/User",
+      "description": "Registered local and Google users"
+    },
+    "/users/{userId}": {
+      "schema": "#/entities/EventState",
+      "description": "Cloud-synchronized monolithic data state of the CRM"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "#/entities/AuditLog",
+      "description": "Audit trails for actions done in the system"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Mar de Rosas - Planner CRM",
+  "description": "Plataforma profesional de planificación de eventos y CRM con control financiero, listas de invitados, tableros de inspiración y asistencia inteligente.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
